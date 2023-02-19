@@ -90,8 +90,11 @@ class RedshiftMaterials(MaterialHelpers):
             gamma = 2.2
         if type == "Linear":
             gamma = 1.0
-        texture[c4d.REDSHIFT_SHADER_TEXTURESAMPLER_TEX0_GAMMAOVERRIDE] = True
-        texture[c4d.REDSHIFT_SHADER_TEXTURESAMPLER_TEX0_GAMMA] = gamma
+        # FIXME: the following settings break in the current version of Redshift and crash the convert texture process
+        # commenting them out make the gamma default to "Auto" which is not what we want, but at least the process completes
+        # the user has to go through all the RS materials and set the colorspace manually
+        #texture[c4d.REDSHIFT_SHADER_TEXTURESAMPLER_TEX0_GAMMAOVERRIDE] = True
+        #texture[c4d.REDSHIFT_SHADER_TEXTURESAMPLER_TEX0_GAMMA] = gamma
 
     def applyMaterials(self):
         doc = c4d.documents.GetActiveDocument()
