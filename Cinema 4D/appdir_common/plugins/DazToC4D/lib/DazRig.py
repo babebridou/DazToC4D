@@ -7,7 +7,7 @@ from .CustomCmd import Cinema4DCommands as dzc4d
 from .CustomIterators import TagIterator
 from . import Database
 from . import Utilities
-
+from .RigDictionary import is_g9, database
 
 class JointFixes:
     joint_orient_dict = dict()
@@ -139,19 +139,31 @@ class JointFixes:
     def find_matching_joint(self, joint):
         doc = documents.GetActiveDocument()
         dz_jnt_name = joint.GetName()
-        prefix = dz_jnt_name[0:1]
-        post_prefix = dz_jnt_name[1:2]
-        if prefix == "l" and post_prefix.isupper():
-            dz_jnt_name = dz_jnt_name[1:]
-            suffix = ""
-        elif prefix == "r" and post_prefix.isupper():
-            dz_jnt_name = dz_jnt_name[1:]
-            suffix = "___R"
+        suffix = ""
+        if is_g9():
+            prefix = dz_jnt_name[0:2]
+            if prefix == 'l_':
+                dz_jnt_name = dz_jnt_name[2:]
+                suffix = ""
+            elif prefix == 'r_':
+                dz_jnt_name = dz_jnt_name[2:]
+                suffix = "___R"
+            else:
+                suffix = ""
         else:
-            suffix = ""
+            prefix = dz_jnt_name[0:1]
+            post_prefix = dz_jnt_name[1:2]
+            if prefix == "l" and post_prefix.isupper():
+                dz_jnt_name = dz_jnt_name[1:]
+                suffix = ""
+            elif prefix == "r" and post_prefix.isupper():
+                dz_jnt_name = dz_jnt_name[1:]
+                suffix = "___R"
+            else:
+                suffix = ""
 
         mesh_name = Utilities.get_daz_name() + "_"
-        constraints = Database.rig_joints
+        constraints = database().rig_joints
         for joints in constraints:
             if dz_jnt_name == joints[0]:
                 return doc.SearchObject(mesh_name + joints[1] + suffix)

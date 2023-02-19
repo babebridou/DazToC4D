@@ -2,6 +2,7 @@ import c4d
 from c4d import documents
 
 from .CustomIterators import ObjectIterator
+from .RigDictionary import rig_label
 
 
 class Cinema4DCommands:
@@ -54,10 +55,11 @@ class Cinema4DCommands:
         """Hard Coded Find of IK Replace with User Data"""
         doc = documents.GetActiveDocument()
         obj = doc.GetFirstObject()
+        
         scene = ObjectIterator(obj)
         ikfound = 0
         for obj in scene:
-            if "Foot_PlatformBase" in obj.GetName():
+            if rig_label("Foot_PlatformBase") in obj.GetName():
                 ikfound = 1
         return ikfound
 

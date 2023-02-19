@@ -9,8 +9,7 @@ from .Utilities import dazToC4Dutils
 from .CustomIterators import TagIterator
 from .DazRig import DazRig, JointFixes
 from . import Utilities
-from . import Database
-
+from .RigDictionary import is_g9, rig_label, database
 
 def applyDazIK(var):
     doc = documents.GetActiveDocument()
@@ -29,17 +28,17 @@ def applyDazIK(var):
     jnt.fix_rig_joints(var.c_joints)
 
     suffix = "___R"
-    objArm = doc.SearchObject(dazName + "jCollar")
-    objLeg = doc.SearchObject(dazName + "jUpLeg")
+    objArm = doc.SearchObject(dazName + rig_label("jCollar"))
+    objLeg = doc.SearchObject(dazName + rig_label("jUpLeg"))
 
     ikmGenerator().makeIKcontrols()
     ikmaxUtils().mirrorObjects(objArm, suffix)
     ikmaxUtils().mirrorObjects(objLeg, suffix)
     ikmGenerator().makeChildKeepPos(
-        dazName + "Foot_Platform___R", dazName + "Foot_PlatformBase___R"
+        dazName + rig_label("Foot_Platform___R"), dazName + rig_label("Foot_PlatformBase___R")
     )
     ikmGenerator().makeChildKeepPos(
-        dazName + "Foot_PlatformBase___R", dazName + "IKM_Controls"
+        dazName + rig_label("Foot_PlatformBase___R"), dazName + "IKM_Controls"
     )
 
     DazRig(dazName).dazEyesLookAtControls()
@@ -50,24 +49,24 @@ def applyDazIK(var):
 
     dazToC4Dutils().constraintJointsToDaz()
     dazToC4Dutils().constraintJointsToDaz("Right")
-    if doc.SearchObject(dazName + "ForearmTwist_ctrl"):
+    if doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl")):
         dazToC4Dutils().twistBoneSetup()  # TwistBone Setup
-        obj = doc.SearchObject(dazName + "ForearmTwist_ctrl")
+        obj = doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl"))
         obj[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_X] = 0
-        obj = doc.SearchObject(dazName + "ForearmTwist_ctrl___R")
+        obj = doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl___R"))
         obj[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_X] = 0
-        ikmGenerator().constraintObj("lForearmTwist", dazName + "ForearmTwist_ctrl")
-        ikmGenerator().constraintObj("rForearmTwist", dazName + "ForearmTwist_ctrl___R")
+        ikmGenerator().constraintObj(rig_label("lForearmTwist"), dazName + rig_label("ForearmTwist_ctrl"))
+        ikmGenerator().constraintObj(rig_label("rForearmTwist"), dazName + rig_label("ForearmTwist_ctrl___R"))
         dazToC4Dutils().fixConstraints()
         dazToC4Dutils().zeroTwistRotationFix(
-            dazName + "ForearmTwist_ctrl", "lForearmTwist"
+            dazName + rig_label("ForearmTwist_ctrl"), rig_label("lForearmTwist")
         )
         dazToC4Dutils().zeroTwistRotationFix(
-            dazName + "ForearmTwist_ctrl___R", "rForearmTwist"
+            dazName + rig_label("ForearmTwist_ctrl___R"), rig_label("rForearmTwist")
         )
 
     ikmaxUtils().freezeChilds(dazName + "IKM_Controls")
-    ikmaxUtils().freezeChilds(dazName + "jPelvis")
+    ikmaxUtils().freezeChilds(dazName + rig_label("jPelvis"))
 
     dazToC4Dutils().addProtection()  # Foot controls lock position, allow rotations.
     ikmaxUtils().hideGuides(1)
@@ -147,7 +146,7 @@ class ikmaxUtils:
         doc = documents.GetActiveDocument()
         objActive = doc.GetActiveObject()
         objMirror = doc.SearchObject(obj.GetName() + suffix)
-        jointPelvis = doc.SearchObject(dazName + "jPelvis")
+        jointPelvis = doc.SearchObject(dazName + rig_label("jPelvis"))
         try:
             objMirror.Remove()
         except:
@@ -409,7 +408,7 @@ class ikmaxUtils:
         if dazName != None:
             doc = documents.GetActiveDocument()
             ikControls = doc.SearchObject(dazName + "IKM_Controls")
-            jointsRoot = doc.SearchObject(dazName + "jPelvis")
+            jointsRoot = doc.SearchObject(dazName + rig_label("jPelvis"))
             tags = TagIterator(jointsRoot)
             try:
                 ikControls.Remove()
@@ -442,7 +441,7 @@ class ikmaxUtils:
     def removeRIG(self):
         if dazName != None:
             doc = documents.GetActiveDocument()
-            jointsRoot = doc.SearchObject(dazName + "jPelvis")
+            jointsRoot = doc.SearchObject(dazName + rig_label("jPelvis"))
             try:
                 jointsRoot.Remove()
             except:
@@ -451,40 +450,40 @@ class ikmaxUtils:
 
     def removeMirrorGuides(self):
         guidesToMirror = [
-            "Pinky_end",
-            "Pinky3",
-            "Pinky2",
-            "Pinky1",
-            "Ring_end",
-            "Ring3",
-            "Ring2",
-            "Ring1",
-            "Middle_end",
-            "Middle3",
-            "Middle2",
-            "Middle1",
-            "Index_end",
-            "Index3",
-            "Index2",
-            "Index1",
-            "Thumb_end",
-            "Thumb2",
-            "Thumb3",
-            "Thumb1",
-            "Hand",
-            "Elbow",
-            "Shoulder",
-            "Toes_end",
-            "Toes",
-            "Foot",
-            "Knee",
-            "LegUpper",
+            rig_label("Pinky_end"),
+            rig_label("Pinky3"),
+            rig_label("Pinky2"),
+            rig_label("Pinky1"),
+            rig_label("Ring_end"),
+            rig_label("Ring3"),
+            rig_label("Ring2"),
+            rig_label("Ring1"),
+            rig_label("Middle_end"),
+            rig_label("Middle3"),
+            rig_label("Middle2"),
+            rig_label("Middle1"),
+            rig_label("Index_end"),
+            rig_label("Index3"),
+            rig_label("Index2"),
+            rig_label("Index1"),
+            rig_label("Thumb_end"),
+            rig_label("Thumb2"),
+            rig_label("Thumb3"),
+            rig_label("Thumb1"),
+            rig_label("Hand"),
+            rig_label("Elbow"),
+            rig_label("Shoulder"),
+            rig_label("Toes_end"),
+            rig_label("Toes"),
+            rig_label("Foot"),
+            rig_label("Knee"),
+            rig_label("LegUpper"),
         ]
         sideNameR = "___R"
         for g in guidesToMirror:
             ikmGenerator().removeObj(dazName + g + sideNameR)
-        ikmGenerator().removeObj(dazName + "Collar" + sideNameR)
-        ikmGenerator().removeObj(dazName + "Collar")
+        ikmGenerator().removeObj(dazName + rig_label("Collar") + sideNameR)
+        ikmGenerator().removeObj(dazName + rig_label("Collar"))
         c4d.EventAdd()
 
     def removeRIGandMirrorsandGuides(self):
@@ -501,20 +500,20 @@ class ikmaxUtils:
 
     def finalFingersAlignamentPass(self, sidename=""):
         doc = documents.GetActiveDocument()
-        jIndex1 = doc.SearchObject(dazName + "jIndex1" + sidename)
-        jMiddle1 = doc.SearchObject(dazName + "jMiddle1" + sidename)
-        jRing1 = doc.SearchObject(dazName + "jRing1" + sidename)
-        jPink1 = doc.SearchObject(dazName + "jPink1" + sidename)
+        jIndex1 = doc.SearchObject(dazName + rig_label("jIndex1") + sidename)
+        jMiddle1 = doc.SearchObject(dazName + rig_label("jMiddle1") + sidename)
+        jRing1 = doc.SearchObject(dazName + rig_label("jRing1") + sidename)
+        jPink1 = doc.SearchObject(dazName + rig_label("jPink1") + sidename)
 
         fingersList = [
-            "jIndex2",
-            "jIndex3",
-            "jMiddle2",
-            "jMiddle3",
-            "jRing2",
-            "jRing3",
-            "jPink2",
-            "jPink3",
+            rig_label("jIndex2"),
+            rig_label("jIndex3"),
+            rig_label("jMiddle2"),
+            rig_label("jMiddle3"),
+            rig_label("jRing2"),
+            rig_label("jRing3"),
+            rig_label("jPink2"),
+            rig_label("jPink3"),
         ]
 
         def zeroYZ(obj):
@@ -525,10 +524,10 @@ class ikmaxUtils:
             if obj.GetRelRot()[2] < 0.09 and obj.GetRelRot()[1] > -0.09:
                 obj[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_Z] = 0
 
-        ikmGenerator().AlignBoneChain(dazName + "jIndex1" + sidename, 2, 1, 0, 1)
-        ikmGenerator().AlignBoneChain(dazName + "jMiddle1" + sidename, 2, 1, 0, 1)
-        ikmGenerator().AlignBoneChain(dazName + "jRing1" + sidename, 2, 1, 0, 1)
-        ikmGenerator().AlignBoneChain(dazName + "jPink1" + sidename, 2, 1, 0, 1)
+        ikmGenerator().AlignBoneChain(dazName + rig_label("jIndex1") + sidename, 2, 1, 0, 1)
+        ikmGenerator().AlignBoneChain(dazName + rig_label("jMiddle1") + sidename, 2, 1, 0, 1)
+        ikmGenerator().AlignBoneChain(dazName + rig_label("jRing1") + sidename, 2, 1, 0, 1)
+        ikmGenerator().AlignBoneChain(dazName + rig_label("jPink1") + sidename, 2, 1, 0, 1)
 
         for jointName in fingersList:
             joint = doc.SearchObject(dazName + jointName + sidename)
@@ -544,22 +543,22 @@ class ikmaxUtils:
             doc.SetActiveObject(joint, c4d.SELECTION_NEW)
             c4d.CallCommand(1019883)  # Align
 
-        alignJoint("jIndex1", "", True)
-        alignJoint("jIndex2", "", True)
-        alignJoint("jIndex3", "", True)
-        alignJoint("jIndex4", "", True)
-        alignJoint("jMiddle1", "", True)
-        alignJoint("jMiddle2", "", True)
-        alignJoint("jMiddle3", "", True)
-        alignJoint("jMiddle4", "", True)
-        alignJoint("jRing1", "", True)
-        alignJoint("jRing2", "", True)
-        alignJoint("jRing3", "", True)
-        alignJoint("jRing4", "", True)
-        alignJoint("jPink1", "", True)
-        alignJoint("jPink2", "", True)
-        alignJoint("jPink3", "", True)
-        alignJoint("jPink4", "", True)
+        alignJoint(rig_label("jIndex1"), "", True)
+        alignJoint(rig_label("jIndex2"), "", True)
+        alignJoint(rig_label("jIndex3"), "", True)
+        alignJoint(rig_label("jIndex4"), "", True)
+        alignJoint(rig_label("jMiddle1"), "", True)
+        alignJoint(rig_label("jMiddle2"), "", True)
+        alignJoint(rig_label("jMiddle3"), "", True)
+        alignJoint(rig_label("jMiddle4"), "", True)
+        alignJoint(rig_label("jRing1"), "", True)
+        alignJoint(rig_label("jRing2"), "", True)
+        alignJoint(rig_label("jRing3"), "", True)
+        alignJoint(rig_label("jRing4"), "", True)
+        alignJoint(rig_label("jPink1"), "", True)
+        alignJoint(rig_label("jPink2"), "", True)
+        alignJoint(rig_label("jPink3"), "", True)
+        alignJoint(rig_label("jPink4"), "", True)
 
     def getLayer(self, layername):
         doc = c4d.documents.GetActiveDocument()
@@ -576,8 +575,8 @@ class ikmaxUtils:
 
         if whatToSearch == "IKcontrols":
             result = doc.SearchObject(dazName + "IKM_Controls")
-        if whatToSearch == "jHead":
-            result = doc.SearchObject(dazName + "jHead")
+        if whatToSearch == rig_label("jHead"):
+            result = doc.SearchObject(dazName + rig_label("jHead"))
 
         if result != None:
             result = 1
@@ -949,7 +948,9 @@ class ikmGenerator:
         # Freeze and Protect ....
         doc = c4d.documents.GetActiveDocument()
 
-        oldJoints = doc.SearchObject("jPink1" + sideName)
+
+
+        oldJoints = doc.SearchObject(rig_label("jPink1") + sideName)
         try:
             oldJoints.Remove()
         except:
@@ -957,82 +958,82 @@ class ikmGenerator:
 
         c4d.CallCommand(100004748)  # Unfold All
 
-        self.checkAlignMethod("Index")
+        self.checkAlignMethod(rig_label("Index"))
 
         # Align Guides
-        if self.checkAlignMethod("Index", sideName) == "Y":
-            self.alignFingers("V2", "Index", sideName)
-        if self.checkAlignMethod("Index", sideName) == "X":
-            self.alignFingers("V", "Index", sideName)
-        if self.checkAlignMethod("Middle", sideName) == "Y":
-            self.alignFingers("V2", "Middle", sideName)
-        if self.checkAlignMethod("Middle", sideName) == "X":
-            self.alignFingers("V", "Middle", sideName)
-        if self.checkAlignMethod("Ring", sideName) == "Y":
-            self.alignFingers("V2", "Ring", sideName)
-        if self.checkAlignMethod("Ring", sideName) == "X":
-            self.alignFingers("V", "Ring", sideName)
-        if self.checkAlignMethod("Pinky", sideName) == "Y":
-            self.alignFingers("V2", "Pinky", sideName)
-        if self.checkAlignMethod("Pinky", sideName) == "X":
-            self.alignFingers("V", "Pinky", sideName)
+        if self.checkAlignMethod(rig_label("Index"), sideName) == "Y":
+            self.alignFingers("V2", rig_label("Index"), sideName)
+        if self.checkAlignMethod(rig_label("Index"), sideName) == "X":
+            self.alignFingers("V", rig_label("Index"), sideName)
+        if self.checkAlignMethod(rig_label("Middle"), sideName) == "Y":
+            self.alignFingers("V2", rig_label("Middle"), sideName)
+        if self.checkAlignMethod(rig_label("Middle"), sideName) == "X":
+            self.alignFingers("V", rig_label("Middle"), sideName)
+        if self.checkAlignMethod(rig_label("Ring"), sideName) == "Y":
+            self.alignFingers("V2", rig_label("Ring"), sideName)
+        if self.checkAlignMethod(rig_label("Ring"), sideName) == "X":
+            self.alignFingers("V", rig_label("Ring"), sideName)
+        if self.checkAlignMethod(rig_label("Pinky"), sideName) == "Y":
+            self.alignFingers("V2", rig_label("Pinky"), sideName)
+        if self.checkAlignMethod(rig_label("Pinky"), sideName) == "X":
+            self.alignFingers("V", rig_label("Pinky"), sideName)
         c4d.EventAdd()
 
-        self.makeJoint("jThumb1" + sideName, "", "Thumb1" + sideName)
-        self.makeJoint("jThumb2" + sideName, "jThumb1" + sideName, "Thumb2" + sideName)
-        self.makeJoint("jThumb3" + sideName, "jThumb2" + sideName, "Thumb3" + sideName)
+        self.makeJoint(rig_label("jThumb1") + sideName, "", rig_label("Thumb1") + sideName)
+        self.makeJoint(rig_label("jThumb2") + sideName, rig_label("jThumb1") + sideName, rig_label("Thumb2") + sideName)
+        self.makeJoint(rig_label("jThumb3") + sideName, rig_label("jThumb2") + sideName, rig_label("Thumb3") + sideName)
         self.makeJoint(
-            "jThumb_end" + sideName, "jThumb3" + sideName, "Thumb_end" + sideName
+            rig_label("jThumb_end") + sideName, rig_label("jThumb3") + sideName, rig_label("Thumb_end") + sideName
         )
-        self.AlignBoneChain(dazName + "jThumb1" + sideName, 2)
+        self.AlignBoneChain(dazName + rig_label("jThumb1") + sideName, 2)
 
         # Bones stuff...
-        self.makeJointAndAlign("jPink", "Pinky", sideName)
-        self.makeJointAndAlign("jRing", "Ring", sideName)
-        self.makeJointAndAlign("jMiddle", "Middle", sideName)
-        self.makeJointAndAlign("jIndex", "Index", sideName)
+        self.makeJointAndAlign(rig_label("jPink"), rig_label("Pinky"), sideName)
+        self.makeJointAndAlign(rig_label("jRing"), rig_label("Ring"), sideName)
+        self.makeJointAndAlign(rig_label("jMiddle"), rig_label("Middle"), sideName)
+        self.makeJointAndAlign(rig_label("jIndex"), rig_label("Index"), sideName)
 
-        self.AlignBoneChain("jIndex1" + sideName, 1)
-        self.AlignBoneChain("jMiddle1" + sideName, 1)
-        self.AlignBoneChain("jRing1" + sideName, 1)
-        self.AlignBoneChain("jPink1" + sideName, 1)
+        self.AlignBoneChain(rig_label("jIndex1") + sideName, 1)
+        self.AlignBoneChain(rig_label("jMiddle1") + sideName, 1)
+        self.AlignBoneChain(rig_label("jRing1") + sideName, 1)
+        self.AlignBoneChain(rig_label("jPink1") + sideName, 1)
 
         c4d.EventAdd()
 
         for i in range(0, 20):
             self.compareAndRotate(
-                "jIndex1" + sideName, "jIndex4" + sideName, "Index_end" + sideName
+                rig_label("jIndex1") + sideName, rig_label("jIndex4") + sideName, rig_label("Index_end") + sideName
             )
             self.compareAndRotate(
-                "jMiddle1" + sideName, "jMiddle4" + sideName, "Middle_end" + sideName
+                rig_label("jMiddle1") + sideName, rig_label("jMiddle4") + sideName, rig_label("Middle_end") + sideName
             )
             self.compareAndRotate(
-                "jRing1" + sideName, "jRing4" + sideName, "Ring_end" + sideName
+                rig_label("jRing1") + sideName, rig_label("jRing4") + sideName, rig_label("Ring_end") + sideName
             )
             self.compareAndRotate(
-                "jPink1" + sideName, "jPink4" + sideName, "Pinky_end" + sideName
+                rig_label("jPink1") + sideName, rig_label("jPink4") + sideName, rig_label("Pinky_end") + sideName
             )
             pass
 
-        self.axisOrder("jIndex1" + sideName)
-        self.axisOrder("jIndex2" + sideName)
-        self.axisOrder("jIndex3" + sideName)
-        self.axisOrder("jIndex4" + sideName)
+        self.axisOrder(rig_label("jIndex1") + sideName)
+        self.axisOrder(rig_label("jIndex2") + sideName)
+        self.axisOrder(rig_label("jIndex3") + sideName)
+        self.axisOrder(rig_label("jIndex4") + sideName)
 
-        self.axisOrder("jMiddle1" + sideName)
-        self.axisOrder("jMiddle2" + sideName)
-        self.axisOrder("jMiddle3" + sideName)
-        self.axisOrder("jMiddle4" + sideName)
+        self.axisOrder(rig_label("jMiddle1") + sideName)
+        self.axisOrder(rig_label("jMiddle2") + sideName)
+        self.axisOrder(rig_label("jMiddle3") + sideName)
+        self.axisOrder(rig_label("jMiddle4") + sideName)
 
-        self.axisOrder("jRing1" + sideName)
-        self.axisOrder("jRing2" + sideName)
-        self.axisOrder("jRing3" + sideName)
-        self.axisOrder("jRing4" + sideName)
+        self.axisOrder(rig_label("jRing1") + sideName)
+        self.axisOrder(rig_label("jRing2") + sideName)
+        self.axisOrder(rig_label("jRing3") + sideName)
+        self.axisOrder(rig_label("jRing4") + sideName)
 
-        self.axisOrder("jPink1" + sideName)
-        self.axisOrder("jPink2" + sideName)
-        self.axisOrder("jPink3" + sideName)
-        self.axisOrder("jPink4" + sideName)
+        self.axisOrder(rig_label("jPink1") + sideName)
+        self.axisOrder(rig_label("jPink2") + sideName)
+        self.axisOrder(rig_label("jPink3") + sideName)
+        self.axisOrder(rig_label("jPink4") + sideName)
 
     # Fingers Make JOINTS --- START ----------------------------------------------------
 
@@ -1146,7 +1147,7 @@ class ikmGenerator:
             obj[c4d.ID_BASEOBJECT_USECOLOR] = 2
             # obj[c4d.NULLOBJECT_ICONCOL] = True
             obj[c4d.ID_BASEOBJECT_COLOR] = c4d.Vector(0, 1, 1)
-        if preset == "Foot_Platform":
+        if preset == rig_label("Foot_Platform"):
             obj[c4d.ID_BASEOBJECT_REL_POSITION, c4d.VECTOR_Y] = 0
             obj[c4d.NULLOBJECT_DISPLAY] = 14
             obj[c4d.NULLOBJECT_ORIENTATION] = 3
@@ -1155,7 +1156,7 @@ class ikmGenerator:
             obj[c4d.ID_BASEOBJECT_USECOLOR] = 2
             # obj[c4d.NULLOBJECT_ICONCOL] = True
             obj[c4d.ID_BASEOBJECT_COLOR] = c4d.Vector(1, 1, 0)
-        if preset == "Foot_PlatformNEW":
+        if preset == rig_label("Foot_PlatformNEW"):
             obj[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_X] = 0
             obj[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_Y] = 0
             obj[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_Z] = 0
@@ -1184,7 +1185,7 @@ class ikmGenerator:
         preset="",
     ):
         doc = documents.GetActiveDocument()
-
+        print("building IK tag for jName '"+jName+"' jTarget '"+jTarget+ "' goal '"+goalName+"' pole '"+poleName+"' polePosition '"+polePosition+"' poleDirection '"+poleDirection+"' preset '"+preset)
         ikJoint = doc.SearchObject(dazName + jName)
         ikJointTarget = doc.SearchObject(dazName + jTarget)
         nullGoal = doc.SearchObject(dazName + goalName)
@@ -1213,13 +1214,15 @@ class ikmGenerator:
                 pass
             IKTag[c4d.ID_CA_IK_TAG_POLE] = poleGoal
 
-        if "Hand" in jTarget:
+        if rig_label("Hand") in jTarget:
             IKTag[c4d.ID_CA_IK_TAG_GOAL_CONSTRAIN] = True
             pass
 
         c4d.EventAdd()
 
     def constraintObj(self, slave, master, mode="", searchObj=1):
+        print("building constraint for slave '"+slave+"' master '"+master+ "' mode '"+mode+"'")
+
         doc = documents.GetActiveDocument()
         if searchObj == 1:
             slaveObj = doc.SearchObject(slave)
@@ -1315,11 +1318,11 @@ class ikmGenerator:
     def makeCollarNull(self, sideName=""):
         doc = c4d.documents.GetActiveDocument()
         objNull = c4d.BaseObject(c4d.Onull)
-        neck = doc.SearchObject(dazName + "Neck_Start")
+        neck = doc.SearchObject(dazName + rig_label("Neck_Start"))
         ikmGuides = doc.SearchObject(dazName + "_IKM-Guides")
-        shoulder = doc.SearchObject(dazName + "Shoulder" + sideName)
+        shoulder = doc.SearchObject(dazName + rig_label("Shoulder") + sideName)
 
-        objNull.SetName(dazName + "Collar" + sideName)
+        objNull.SetName(dazName + rig_label("Collar") + sideName)
         objNull.InsertUnder(ikmGuides)
         objNull.SetMg(neck.GetMg())
 
@@ -1337,11 +1340,11 @@ class ikmGenerator:
     def makeDAZCollarNull(self, sideName=""):
         doc = c4d.documents.GetActiveDocument()
         objNull = c4d.BaseObject(c4d.Onull)
-        dazCollar = doc.SearchObject("lCollar")
+        dazCollar = doc.SearchObject(rig_label("lCollar"))
         ikmGuides = doc.SearchObject(dazName + "_IKM-Guides")
-        shoulder = doc.SearchObject(dazName + "Shoulder" + sideName)
+        shoulder = doc.SearchObject(dazName + rig_label("Shoulder") + sideName)
 
-        objNull.SetName(dazName + "Collar" + sideName)
+        objNull.SetName(dazName + rig_label("Collar") + sideName)
         objNull.InsertUnder(ikmGuides)
         objNull.SetMg(dazCollar.GetMg())
 
@@ -1375,9 +1378,9 @@ class ikmGenerator:
         doc = documents.GetActiveDocument()
 
         # --- ARM  ---------------------------------------------
-        self.makeJoint("jCollar" + sideName, "jChestUpper", "Collar" + sideName)
-        dazJoint = doc.SearchObject("lCollar")
-        joint = doc.SearchObject(dazName + "jCollar" + sideName)
+        self.makeJoint(rig_label("jCollar") + sideName, rig_label("jChestUpper"), rig_label("Collar") + sideName)
+        dazJoint = doc.SearchObject(rig_label("lCollar"))
+        joint = doc.SearchObject(dazName + rig_label("jCollar") + sideName)
 
         try:
             joint.SetMg(dazJoint.GetMg())
@@ -1386,31 +1389,31 @@ class ikmGenerator:
             pass
         try:
             self.makeJoint(
-                "jArm" + sideName, "jCollar" + sideName, "Shoulder" + sideName
+                rig_label("jArm") + sideName, rig_label("jCollar") + sideName, rig_label("Shoulder") + sideName
             )
         except:
             print("joint skip")
             pass
-        self.makeJoint("jForeArm" + sideName, "jArm" + sideName, "Elbow" + sideName)
-        self.makeJoint("jHand" + sideName, "jForeArm" + sideName, "Hand" + sideName)
+        self.makeJoint(rig_label("jForeArm") + sideName, rig_label("jArm") + sideName, rig_label("Elbow") + sideName)
+        self.makeJoint(rig_label("jHand") + sideName, rig_label("jForeArm") + sideName, rig_label("Hand") + sideName)
 
         c4d.EventAdd()
 
         # ARM - Bones - Align
-        joint = doc.SearchObject(dazName + "jArm" + sideName)
+        joint = doc.SearchObject(dazName + rig_label("jArm") + sideName)
         doc.SetActiveObject(joint)
         c4d.CallCommand(1019883)  # Align
 
         # ARM - Bones - Align
-        jFootBone = doc.SearchObject(dazName + "jArm" + sideName)
+        jFootBone = doc.SearchObject(dazName + rig_label("jArm") + sideName)
         jFootBone[c4d.ID_CA_JOINT_OBJECT_BONE_AXIS] = 0
         doc.SetActiveObject(jFootBone)
         c4d.CallCommand(1019883)  # Align
-        jFootBone = doc.SearchObject(dazName + "jForeArm" + sideName)
+        jFootBone = doc.SearchObject(dazName + rig_label("jForeArm") + sideName)
         jFootBone[c4d.ID_CA_JOINT_OBJECT_BONE_AXIS] = 0
         doc.SetActiveObject(jFootBone)
         c4d.CallCommand(1019883)  # Align
-        jFootBone = doc.SearchObject(dazName + "jHand" + sideName)
+        jFootBone = doc.SearchObject(dazName + rig_label("jHand") + sideName)
         jFootBone[c4d.ID_CA_JOINT_OBJECT_BONE_AXIS] = 0
         doc.SetActiveObject(jFootBone)
         c4d.CallCommand(1019883)  # Align
@@ -1420,31 +1423,31 @@ class ikmGenerator:
         # LEG - Guides - Align
         self.alignOnePoint(
             "X",
-            dazName + "LegUpper" + sideName,
-            dazName + "Foot" + sideName,
-            dazName + "Knee" + sideName,
+            dazName + rig_label("LegUpper") + sideName,
+            dazName + rig_label("Foot") + sideName,
+            dazName + rig_label("Knee") + sideName,
         )
         c4d.EventAdd()
         # LEG - Bones - Create
-        self.makeJoint("jUpLeg" + sideName, "jPelvis", "LegUpper" + sideName)
-        self.makeJoint("jLeg" + sideName, "jUpLeg" + sideName, "Knee" + sideName)
+        self.makeJoint(rig_label("jUpLeg") + sideName, rig_label("jPelvis"), rig_label("LegUpper") + sideName)
+        self.makeJoint(rig_label("jLeg") + sideName, rig_label("jUpLeg") + sideName, rig_label("Knee") + sideName)
 
-        self.AlignBoneChain(dazName + "jUpLeg" + sideName, 2)
+        self.AlignBoneChain(dazName + rig_label("jUpLeg") + sideName, 2)
 
-        self.makeJoint("jFoot" + sideName, "jLeg" + sideName, "Foot" + sideName)
+        self.makeJoint(rig_label("jFoot") + sideName, rig_label("jLeg") + sideName, rig_label("Foot") + sideName)
 
         # LEG - Bones - Align
-        jLegBone = doc.SearchObject(dazName + "jUpLeg" + sideName)
+        jLegBone = doc.SearchObject(dazName + rig_label("jUpLeg") + sideName)
         doc.SetActiveObject(jLegBone)
         c4d.CallCommand(1019883)  # Align
-        jLegBone = doc.SearchObject(dazName + "jLeg" + sideName)
+        jLegBone = doc.SearchObject(dazName + rig_label("jLeg") + sideName)
         doc.SetActiveObject(jLegBone)
         c4d.CallCommand(1019883)  # Align
 
         # --- FOOT ---------
         # FOOT - Guides - Fix
-        gToes = doc.SearchObject(dazName + "Toes" + sideName)
-        gToesEnd = doc.SearchObject(dazName + "Toes_end" + sideName)
+        gToes = doc.SearchObject(dazName + rig_label("Toes") + sideName)
+        gToesEnd = doc.SearchObject(dazName + rig_label("Toes_end") + sideName)
         if gToesEnd:
             gToesY = gToes.GetAbsPos()[1]
             gToesEndX = gToesEnd.GetAbsPos()[0]
@@ -1455,35 +1458,36 @@ class ikmGenerator:
         # FOOT - Guides - Align
         self.alignOnePoint(
             "X2",
-            dazName + "Foot" + sideName,
-            dazName + "Toes_end" + sideName,
-            dazName + "Toes" + sideName,
+            dazName + rig_label("Foot") + sideName,
+            dazName + rig_label("Toes_end") + sideName,
+            dazName + rig_label("Toes") + sideName,
         )
         c4d.EventAdd()
         # FOOT - Bones - Create
-        self.makeJoint("jFoot2" + sideName, "", "Foot" + sideName)
-        self.makeJoint("jToes" + sideName, "jFoot2" + sideName, "Toes" + sideName)
+        self.makeJoint(rig_label("jFoot2") + sideName, "", rig_label("Foot") + sideName)
+        self.makeJoint(rig_label("jToes") + sideName, rig_label("jFoot2") + sideName, rig_label("Toes") + sideName)
         self.makeJoint(
-            "jToes_end" + sideName, "jToes" + sideName, "Toes_end" + sideName
+            rig_label("jToes_end") + sideName, rig_label("jToes") + sideName, rig_label("Toes_end") + sideName
         )
 
-        self.removeObj(dazName + "jFoot" + sideName)
+        self.removeObj(dazName + rig_label("jFoot") + sideName)
 
-        jLegBone = doc.SearchObject(dazName + "jLeg" + sideName)
-        jFootBone = doc.SearchObject(dazName + "jFoot2" + sideName)
+        jLegBone = doc.SearchObject(dazName + rig_label("jLeg") + sideName)
+        jFootBone = doc.SearchObject(dazName + rig_label("jFoot2") + sideName)
         mg = jFootBone.GetMg()
         jFootBone.InsertUnder(jLegBone)
         jFootBone.SetMg(mg)
-        jFootBone.SetName(dazName + "jFoot" + sideName)
+        jFootBone.SetName(dazName + rig_label("jFoot") + sideName)
 
-        self.AlignBoneChain(dazName + "jUpLeg" + sideName, 2)
-        self.AlignBoneChain(dazName + "jFoot" + sideName, 1, 0, 0, 1)
+        self.AlignBoneChain(dazName + rig_label("jUpLeg") + sideName, 2)
+        self.AlignBoneChain(dazName + rig_label("jFoot") + sideName, 1, 0, 0, 1)
 
     def mirrorGuides(self, guides_to_mirror):
         daz_name = Utilities.get_daz_name() + "_"
         parentMirrorName = daz_name + "_IKM-Guides"
         addToName = "___R"
         for g in guides_to_mirror:
+            print("mirroring "+daz_name+g+" with "+addToName+" into "+parentMirrorName)
             try:
                 self.mirrorNulls(daz_name + g, addToName, parentMirrorName)
             except:
@@ -1505,7 +1509,7 @@ class ikmGenerator:
             joint4 = doc.SearchObject(modelBase + jointName + "4")
             jointThumbEnd = doc.SearchObject(modelBase + jointName + "_end")
             complete = 1
-            if "Thumb" in jointName:
+            if rig_label("Thumb") in jointName:
                 if joint1 != None and joint2 != None and jointThumbEnd != None:
                     pass
                 else:
@@ -1525,23 +1529,23 @@ class ikmGenerator:
 
         lastFinger = ""
 
-        if fingerExist(modelBase, "jThumb") == 1:
-            lastFinger = "jThumb"
-            if fingerExist(modelBase, "jIndex") == 1:
-                lastFinger = "jIndex"
-                if fingerExist(modelBase, "jMiddle") == 1:
-                    lastFinger = "jMiddle"
-                    if fingerExist(modelBase, "jRing") == 1:
-                        lastFinger = "jRing"
-                        if fingerExist(modelBase, "jPinky") == 1:
-                            lastFinger = "jPinky"
+        if fingerExist(modelBase, rig_label("jThumb")) == 1:
+            lastFinger = rig_label("jThumb")
+            if fingerExist(modelBase, rig_label("jIndex")) == 1:
+                lastFinger = rig_label("jIndex")
+                if fingerExist(modelBase, rig_label("jMiddle")) == 1:
+                    lastFinger = rig_label("jMiddle")
+                    if fingerExist(modelBase, rig_label("jRing")) == 1:
+                        lastFinger = rig_label("jRing")
+                        if fingerExist(modelBase, rig_label("jPinky")) == 1:
+                            lastFinger = rig_label("jPinky")
 
         return lastFinger
 
     def makeRig(self):
         doc = documents.GetActiveDocument()
-        guides_to_mirror = Database.guides_to_mirror
-        center_joints = Database.center_joints
+        guides_to_mirror = database().guides_to_mirror #_genesis9 if g9() else Database.guides_to_mirror
+        center_joints = database().center_joints #_genesis9 if g9() else Database.center_joints
         sideName = "___R"
 
         # --- CENTER BONES -------------------------------------
@@ -1557,39 +1561,47 @@ class ikmGenerator:
         self.makeFingersFull(sideName)
         self.makeFingersFull()
 
-        self.removeIfZero(dazName + "jIndex1")
-        self.removeIfZero(dazName + "jMiddle1")
-        self.removeIfZero(dazName + "jRing1")
-        self.removeIfZero(dazName + "jPink1")
-        self.removeIfZero(dazName + "jThumb1")
+        jIndex1 = rig_label("jIndex1")
+        jMiddle1 = rig_label("jMiddle1")
+        jRing1 = rig_label("jRing1")
+        jPink1 = rig_label("jPink1")
+        jThumb1 = rig_label("jThumb1")
+        jHand = rig_label("jHand")
 
-        self.removeIfZero(dazName + "jIndex1" + sideName)
-        self.removeIfZero(dazName + "jMiddle1" + sideName)
-        self.removeIfZero(dazName + "jRing1" + sideName)
-        self.removeIfZero(dazName + "jPink1" + sideName)
-        self.removeIfZero(dazName + "jThumb1" + sideName)
+
+        self.removeIfZero(dazName + jIndex1)
+        self.removeIfZero(dazName + jMiddle1)
+        self.removeIfZero(dazName + jRing1)
+        self.removeIfZero(dazName + jPink1)
+        self.removeIfZero(dazName + jThumb1)
+
+        self.removeIfZero(dazName + jIndex1 + sideName)
+        self.removeIfZero(dazName + jMiddle1 + sideName)
+        self.removeIfZero(dazName + jRing1 + sideName)
+        self.removeIfZero(dazName + jPink1 + sideName)
+        self.removeIfZero(dazName + jThumb1 + sideName)
 
         self.makeChildKeepPos(
-            dazName + "jIndex1" + sideName, dazName + "jHand" + sideName
+            dazName + jIndex1 + sideName, dazName + jHand + sideName
         )
         self.makeChildKeepPos(
-            dazName + "jMiddle1" + sideName, dazName + "jHand" + sideName
+            dazName + jMiddle1 + sideName, dazName + jHand + sideName
         )
         self.makeChildKeepPos(
-            dazName + "jRing1" + sideName, dazName + "jHand" + sideName
+            dazName + jRing1 + sideName, dazName + jHand + sideName
         )
         self.makeChildKeepPos(
-            dazName + "jPink1" + sideName, dazName + "jHand" + sideName
+            dazName + jPink1 + sideName, dazName + jHand + sideName
         )
         self.makeChildKeepPos(
-            dazName + "jThumb1" + sideName, dazName + "jHand" + sideName
+            dazName + jThumb1 + sideName, dazName + jHand + sideName
         )
 
-        self.makeChildKeepPos(dazName + "jIndex1", dazName + "jHand")
-        self.makeChildKeepPos(dazName + "jMiddle1", dazName + "jHand")
-        self.makeChildKeepPos(dazName + "jRing1", dazName + "jHand")
-        self.makeChildKeepPos(dazName + "jPink1", dazName + "jHand")
-        self.makeChildKeepPos(dazName + "jThumb1", dazName + "jHand")
+        self.makeChildKeepPos(dazName + jIndex1, dazName + jHand)
+        self.makeChildKeepPos(dazName + jMiddle1, dazName + jHand)
+        self.makeChildKeepPos(dazName + jRing1, dazName + jHand)
+        self.makeChildKeepPos(dazName + jPink1, dazName + jHand)
+        self.makeChildKeepPos(dazName + jThumb1, dazName + jHand)
         c4d.CallCommand(100004749)  # Fold All
 
         for g in guides_to_mirror:
@@ -1597,9 +1609,9 @@ class ikmGenerator:
 
         # ALIGN FINGERS AND MIRROR RESULT
         lastFinger = self.checkFingersAmount(dazName)
-        if lastFinger == "jMiddle" or lastFinger == "jRing" or lastFinger == "jPink":
+        if lastFinger == rig_label("jMiddle") or lastFinger == rig_label("jRing") or lastFinger == rig_label("jPink"):
             alignFingersFull().start(dazName, lastFinger)
-            objArm = doc.SearchObject(dazName + "jCollar")
+            objArm = doc.SearchObject(dazName + rig_label("jCollar"))
             suffix = "___R"
             ikmaxUtils().mirrorObjects(objArm, suffix)
         # ----
@@ -1612,180 +1624,179 @@ class ikmGenerator:
     def makeIKcontrols(self, sideName=""):
         doc = documents.GetActiveDocument()
         self.makeNull(
-            dazName + "IK_Foot" + sideName,
-            dazName + "jFoot" + sideName,
+            dazName + rig_label("IK_Foot") + sideName,
+            dazName + rig_label("jFoot") + sideName,
             "zeroRotInvisible",
         )
         self.makeNull(
-            dazName + "Toe_Rot" + sideName, dazName + "jToes" + sideName, "sphereToe"
+            dazName + rig_label("Toe_Rot") + sideName, dazName + rig_label("jToes") + sideName, "sphereToe"
         )
         JointFixes.update_rotation_order(
-            dazName + "Toe_Rot" + sideName, dazName + "jToes"
+            dazName + rig_label("Toe_Rot") + sideName, dazName + rig_label("jToes")
         )
         self.makeNull(
-            dazName + "Foot_Roll" + sideName, dazName + "jToes" + sideName, "cube"
+            dazName + rig_label("Foot_Roll") + sideName, dazName + rig_label("jToes") + sideName, "cube"
         )
         JointFixes.update_rotation_order(
-            dazName + "Foot_Roll" + sideName, dazName + "jToes"
+            dazName + rig_label("Foot_Roll") + sideName, dazName + rig_label("jToes")
         )
         self.makeNull(
-            dazName + "IK_Hand" + sideName, dazName + "jHand" + sideName, "cube"
+            dazName + rig_label("IK_Hand") + sideName, dazName + rig_label("jHand") + sideName, "cube"
         )
         JointFixes.update_rotation_order(
-            dazName + "IK_Hand" + sideName, dazName + "jHand" + sideName
+            dazName + rig_label("IK_Hand") + sideName, dazName + rig_label("jHand") + sideName
         )
         # Extra Controls
-        self.makeNull(dazName + "Collar_ctrl", dazName + "jCollar", "collar")
-        JointFixes.update_rotation_order(dazName + "Collar_ctrl", dazName + "jCollar")
-        self.constraintObj(dazName + "jCollar", dazName + "Collar_ctrl")
+        self.makeNull(dazName + rig_label("Collar_ctrl"), dazName + rig_label("jCollar"), rig_label("collar"))
+        JointFixes.update_rotation_order(dazName + rig_label("Collar_ctrl"), dazName + rig_label("jCollar"))
+        self.constraintObj(dazName + rig_label("jCollar"), dazName + rig_label("Collar_ctrl"))
 
         self.makeIKtag(
-            "jArm" + sideName,
-            "jHand" + sideName,
-            "IK_Hand" + sideName,
-            "jArm.Pole" + sideName,
-            "Shoulder" + sideName,
+            rig_label("jArm") + sideName,
+            rig_label("jHand") + sideName,
+            rig_label("IK_Hand") + sideName,
+            rig_label("jArm.Pole")+ sideName,
+            rig_label("Shoulder")+ sideName,
         )
 
         self.makeIKtag(
-            "jUpLeg" + sideName,
-            "jFoot" + sideName,
-            "IK_Foot" + sideName,
-            "jUpLeg.Pole" + sideName,
-            "LegUpper" + sideName,
+            rig_label("jUpLeg") + sideName,
+            rig_label("jFoot") + sideName,
+            rig_label("IK_Foot") + sideName,
+            rig_label("jUpLeg.Pole") + sideName,
+            rig_label("LegUpper") + sideName,
             "Negative",
         )
 
         self.makeNull(
-            dazName + "Foot_Platform" + sideName,
-            dazName + "IK_Foot" + sideName,
-            "Foot_Platform",
+            dazName + rig_label("Foot_Platform") + sideName,
+            dazName + rig_label("IK_Foot") + sideName,
+            rig_label("Foot_Platform"),
         )
         JointFixes.update_rotation_order(
-            dazName + "Foot_Platform" + sideName, dazName + "IK_Foot" + sideName
+            dazName + rig_label("Foot_Platform") + sideName, dazName + rig_label("IK_Foot") + sideName
         )
         self.makeChildKeepPos(
-            dazName + "IK_Foot" + sideName, dazName + "Foot_Platform" + sideName
+            dazName + rig_label("IK_Foot") + sideName, dazName + rig_label("Foot_Platform") + sideName
         )
 
         self.constraintObj(
-            dazName + "jFoot" + sideName,
-            dazName + "Foot_Platform" + sideName,
+            dazName + rig_label("jFoot") + sideName,
+            dazName + rig_label("Foot_Platform") + sideName,
             "UPVECTOR",
         )
         self.constraintObj(
-            dazName + "jHand" + sideName, dazName + "IK_Hand" + sideName, "ROTATION"
+            dazName + rig_label("jHand") + sideName, dazName + rig_label("IK_Hand") + sideName, "ROTATION"
         )
 
         self.makeNull(
-            dazName + "ToesEnd" + sideName, dazName + "jToes_end" + sideName, "none"
+            dazName + rig_label("ToesEnd") + sideName, dazName + rig_label("jToes_end") + sideName, "none"
         )
         JointFixes.update_rotation_order(
-            dazName + "ToesEnd" + sideName, dazName + "jToes_end" + sideName
+            dazName + rig_label("ToesEnd") + sideName, dazName + rig_label("jToes_end") + sideName
         )
-        self.makeIKtag("jFoot" + sideName, "jToes" + sideName, "Toe_Rot" + sideName)
-        self.makeIKtag("jToes" + sideName, "jToes_end" + sideName, "ToesEnd" + sideName)
+        self.makeIKtag(rig_label("jFoot") + sideName, rig_label("jToes") + sideName, rig_label("Toe_Rot") + sideName)
+        self.makeIKtag(rig_label("jToes") + sideName, rig_label("jToes_end") + sideName, rig_label("ToesEnd") + sideName)
 
         self.makeChildKeepPos(
-            dazName + "ToesEnd" + sideName, dazName + "Toe_Rot" + sideName
+            dazName + rig_label("ToesEnd") + sideName, dazName + rig_label("Toe_Rot") + sideName
         )
         self.makeChildKeepPos(
-            dazName + "Toe_Rot" + sideName, dazName + "Foot_Platform" + sideName
+            dazName + rig_label("Toe_Rot") + sideName, dazName + rig_label("Foot_Platform") + sideName
         )
         self.makeChildKeepPos(
-            dazName + "Foot_Roll" + sideName, dazName + "Foot_Platform" + sideName
+            dazName + rig_label("Foot_Roll") + sideName, dazName + rig_label("Foot_Platform") + sideName
         )
 
         self.makeChildKeepPos(
-            dazName + "IK_Foot" + sideName, dazName + "Foot_Roll" + sideName
+            dazName + rig_label("IK_Foot") + sideName, dazName + rig_label("Foot_Roll") + sideName
         )
 
         if sideName == "":
-            self.makeNull(dazName + "Pelvis_ctrl", dazName + "jPelvis", "pelvis")
-            self.constraintObj(dazName + "jPelvis", dazName + "Pelvis_ctrl")
+            self.makeNull(dazName + rig_label("Pelvis_ctrl"), dazName + rig_label("jPelvis"), "pelvis")
+            self.constraintObj(dazName + rig_label("jPelvis"), dazName + rig_label("Pelvis_ctrl"))
 
             # check if twistbones:
-            if doc.SearchObject("lForearmTwist"):
-                self.makeNull(dazName + "ForearmTwist_ctrl", "lForearmTwist", "twist")
-                self.makeNull(
-                    dazName + "ForearmTwist_ctrl___R", "rForearmTwist", "twist"
-                )
+            self.makeNull(dazName + rig_label("ForearmTwist_ctrl"), rig_label("lForearmTwist"), "twist")
+            self.makeNull(
+                dazName + rig_label("ForearmTwist_ctrl___R"), rig_label("rForearmTwist"), "twist"
+            ) 
         if sideName == "":
-            self.makeNull(dazName + "Spine_ctrl", dazName + "jSpine", "spine")
-            self.constraintObj(dazName + "jSpine", dazName + "Spine_ctrl")
+            self.makeNull(dazName + rig_label("Spine_ctrl"), dazName + rig_label("jSpine"), "spine")
+            self.constraintObj(dazName + rig_label("jSpine"), dazName + rig_label("Spine_ctrl"))
 
         if sideName == "":  # Extra Controls
             newNull = self.makeNull(
-                dazName + "AbdomenUpper_ctrl", dazName + "jAbdomenUpper", "spine"
+                dazName + rig_label("AbdomenUpper_ctrl"), dazName + rig_label("jAbdomenUpper"), "spine"
             )
             JointFixes.update_rotation_order(
-                dazName + "AbdomenUpper_ctrl", dazName + "jAbdomenUpper"
+                dazName + rig_label("AbdomenUpper_ctrl"), dazName + rig_label("jAbdomenUpper")
             )
-            self.constraintObj(dazName + "jAbdomenUpper", dazName + "AbdomenUpper_ctrl")
+            self.constraintObj(dazName + rig_label("jAbdomenUpper"), dazName + rig_label("AbdomenUpper_ctrl"))
             newNull[c4d.ID_BASEOBJECT_VISIBILITY_EDITOR] = 1
 
             newNull = self.makeNull(
-                dazName + "ChestUpper_ctrl", dazName + "jChestUpper", "spine"
+                dazName + rig_label("ChestUpper_ctrl"), dazName + rig_label("jChestUpper"), "spine"
             )
-            self.constraintObj(dazName + "jChestUpper", dazName + "ChestUpper_ctrl")
+            self.constraintObj(dazName + rig_label("jChestUpper"), dazName + rig_label("ChestUpper_ctrl"))
             newNull[c4d.ID_BASEOBJECT_VISIBILITY_EDITOR] = 1
 
             self.makeNull(
-                dazName + "Foot_PlatformBase" + sideName,
-                dazName + "jFoot",
-                "Foot_PlatformNEW",
+                dazName + rig_label("Foot_PlatformBase") + sideName,
+                dazName + rig_label("jFoot"),
+                rig_label("Foot_PlatformNEW"),
             )
             self.makeNull(
-                dazName + "Foot_PlatformBase___R" + sideName,
-                dazName + "jFoot___R",
-                "Foot_PlatformNEW",
+                dazName + rig_label("Foot_PlatformBase___R") + sideName,
+                dazName + rig_label("jFoot___R"),
+                rig_label("Foot_PlatformNEW"),
             )
         if sideName == "":
-            self.makeNull(dazName + "Chest_ctrl", dazName + "jChest", "spine")
-            self.constraintObj(dazName + "jChest", dazName + "Chest_ctrl")
+            self.makeNull(dazName + rig_label("Chest_ctrl"), dazName + rig_label("jChest"), "spine")
+            self.constraintObj(dazName + rig_label("jChest"), dazName + rig_label("Chest_ctrl"))
 
         if sideName == "":
-            self.makeNull(dazName + "Neck_ctrl", dazName + "jNeck", "neck")
-            self.constraintObj(dazName + "jNeck", dazName + "Neck_ctrl")
+            self.makeNull(dazName + rig_label("Neck_ctrl"), dazName + rig_label("jNeck"), "neck")
+            self.constraintObj(dazName + rig_label("jNeck"), dazName + rig_label("Neck_ctrl"))
 
         if sideName == "":
-            self.makeNull(dazName + "Head_ctrl", dazName + "jHead", "head")
-            self.constraintObj(dazName + "jHead", dazName + "Head_ctrl")
+            self.makeNull(dazName + rig_label("Head_ctrl"), dazName + rig_label("jHead"), "head")
+            self.constraintObj(dazName + rig_label("jHead"), dazName + rig_label("Head_ctrl"))
 
-        self.makeChildKeepPos(dazName + "Head_ctrl", dazName + "Neck_ctrl")
-        self.makeChildKeepPos(dazName + "Neck_ctrl", dazName + "ChestUpper_ctrl")
-        self.makeChildKeepPos(dazName + "Chest_ctrl", dazName + "AbdomenUpper_ctrl")
-        self.makeChildKeepPos(dazName + "Spine_ctrl", dazName + "Pelvis_ctrl")
+        self.makeChildKeepPos(dazName + rig_label("Head_ctrl"), dazName + rig_label("Neck_ctrl"))
+        self.makeChildKeepPos(dazName + rig_label("Neck_ctrl"), dazName + rig_label("ChestUpper_ctrl"))
+        self.makeChildKeepPos(dazName + rig_label("Chest_ctrl"), dazName + rig_label("AbdomenUpper_ctrl"))
+        self.makeChildKeepPos(dazName + rig_label("Spine_ctrl"), dazName + rig_label("Pelvis_ctrl"))
 
-        self.makeChildKeepPos(dazName + "AbdomenUpper_ctrl", dazName + "Spine_ctrl")
-        self.makeChildKeepPos(dazName + "ChestUpper_ctrl", dazName + "Chest_ctrl")
-
-        self.makeChildKeepPos(
-            dazName + "jUpLeg.Pole" + sideName, dazName + "Pelvis_ctrl"
-        )
-        self.makeChildKeepPos(
-            dazName + "jArm.Pole" + sideName, dazName + "ChestUpper_ctrl"
-        )
-        self.makeChildKeepPos(
-            dazName + "IK_Hand" + sideName, dazName + "ChestUpper_ctrl"
-        )
+        self.makeChildKeepPos(dazName + rig_label("AbdomenUpper_ctrl"), dazName + rig_label("Spine_ctrl"))
+        self.makeChildKeepPos(dazName + rig_label("ChestUpper_ctrl"), dazName + rig_label("Chest_ctrl"))
 
         self.makeChildKeepPos(
-            dazName + "Collar_ctrl" + sideName, dazName + "ChestUpper_ctrl"
+            dazName + rig_label("jUpLeg.Pole") + sideName, dazName + rig_label("Pelvis_ctrl")
         )
         self.makeChildKeepPos(
-            dazName + "Collar_ctrl___R" + sideName, dazName + "ChestUpper_ctrl"
+            dazName + rig_label("jArm.Pole") + sideName, dazName + rig_label("ChestUpper_ctrl")
+        )
+        self.makeChildKeepPos(
+            dazName + rig_label("IK_Hand") + sideName, dazName + rig_label("ChestUpper_ctrl")
+        )
+
+        self.makeChildKeepPos(
+            dazName + rig_label("Collar_ctrl") + sideName, dazName + rig_label("ChestUpper_ctrl")
+        )
+        self.makeChildKeepPos(
+            dazName + rig_label("Collar_ctrl___R") + sideName, dazName + rig_label("ChestUpper_ctrl")
         )
         if sideName == "":
-            self.makeNull(dazName + "IKM_Controls", dazName + "jPelvis", "ROOT")
-            self.makeChildKeepPos(dazName + "Pelvis_ctrl", dazName + "IKM_Controls")
+            self.makeNull(dazName + "IKM_Controls", dazName + rig_label("jPelvis"), "ROOT")
+            self.makeChildKeepPos(dazName + rig_label("Pelvis_ctrl"), dazName + "IKM_Controls")
 
-        self.makeChildKeepPos(dazName + "Foot_Platform", dazName + "Foot_PlatformBase")
-        self.makeChildKeepPos(dazName + "Foot_PlatformBase", dazName + "IKM_Controls")
+        self.makeChildKeepPos(dazName + rig_label("Foot_Platform"), dazName + rig_label("Foot_PlatformBase"))
+        self.makeChildKeepPos(dazName + rig_label("Foot_PlatformBase"), dazName + "IKM_Controls")
 
-        self.makeChildKeepPos(dazName + "ForearmTwist_ctrl", dazName + "jForeArm")
+        self.makeChildKeepPos(dazName + rig_label("ForearmTwist_ctrl"), dazName + rig_label("jForeArm"))
         self.makeChildKeepPos(
-            dazName + "ForearmTwist_ctrl___R", dazName + "jForeArm___R"
+            dazName + rig_label("ForearmTwist_ctrl___R"), dazName + rig_label("jForeArm___R")
         )
 
         dazToC4Dutils().initialDisplaySettings()
@@ -1936,43 +1947,43 @@ class alignFingersFull:
     def start(self, modelName, lastFinger=""):
         doc = c4d.documents.GetActiveDocument()
         # modelName = 'Human_Builder_' #Replace with model name....
-        jHand = modelName + "jHand"
-        jIndex1 = modelName + "jIndex1"
-        jIndex2 = modelName + "jIndex2"
-        jIndex3 = modelName + "jIndex3"
-        jMiddle1 = modelName + "jMiddle1"
-        jMiddle2 = modelName + "jMiddle2"
-        jMiddle3 = modelName + "jMiddle3"
-        jRing1 = modelName + "jRing1"
-        jRing2 = modelName + "jRing2"
-        jRing3 = modelName + "jRing3"
-        jPink1 = modelName + "jPink1"
-        jPink2 = modelName + "jPink2"
-        jPink3 = modelName + "jPink3"
+        jHand = modelName + rig_label("jHand")
+        jIndex1 = modelName + rig_label("jIndex1")
+        jIndex2 = modelName + rig_label("jIndex2")
+        jIndex3 = modelName + rig_label("jIndex3")
+        jMiddle1 = modelName + rig_label("jMiddle1")
+        jMiddle2 = modelName + rig_label("jMiddle2")
+        jMiddle3 = modelName + rig_label("jMiddle3")
+        jRing1 = modelName + rig_label("jRing1")
+        jRing2 = modelName + rig_label("jRing2")
+        jRing3 = modelName + rig_label("jRing3")
+        jPink1 = modelName + rig_label("jPink1")
+        jPink2 = modelName + rig_label("jPink2")
+        jPink3 = modelName + rig_label("jPink3")
         fingersList = [
-            "jIndex1",
-            "jIndex2",
-            "jIndex3",
-            "jMiddle1",
-            "jMiddle2",
-            "jMiddle3",
-            "jRing1",
-            "jRing2",
-            "jRing3",
-            "jPink1",
-            "jPink2",
-            "jPink3",
+            rig_label("jIndex1"),
+            rig_label("jIndex2"),
+            rig_label("jIndex3"),
+            rig_label("jMiddle1"),
+            rig_label("jMiddle2"),
+            rig_label("jMiddle3"),
+            rig_label("jRing1"),
+            rig_label("jRing2"),
+            rig_label("jRing3"),
+            rig_label("jPink1"),
+            rig_label("jPink2"),
+            rig_label("jPink3"),
         ]
 
         for j in fingersList:
             self.alignJoints(modelName + j)  # Replace with model name....
 
         # Generate plane if at least jIndex and other finger present...
-        if lastFinger == "jPink":
+        if lastFinger == rig_label("jPink"):
             self.generateNormalFromObjs(jHand, jIndex1, jPink1)
-        if lastFinger == "jRing":
+        if lastFinger == rig_label("jRing"):
             self.generateNormalFromObjs(jHand, jIndex1, jRing1)
-        if lastFinger == "jMiddle":
+        if lastFinger == rig_label("jMiddle"):
             self.generateNormalFromObjs(jHand, jIndex1, jMiddle1)
 
         c4d.DrawViews(
@@ -1981,10 +1992,10 @@ class alignFingersFull:
             | c4d.DRAWFLAGS_STATICBREAK
         )
 
-        self.AlignBoneChain(modelName + "jIndex1", 2, 3, 0, 2)
-        self.AlignBoneChain(modelName + "jMiddle1", 2, 3, 0, 2)
-        self.AlignBoneChain(modelName + "jRing1", 2, 3, 0, 2)
-        self.AlignBoneChain(modelName + "jPink1", 2, 3, 0, 2)
+        self.AlignBoneChain(modelName + rig_label("jIndex1"), 2, 3, 0, 2)
+        self.AlignBoneChain(modelName + rig_label("jMiddle1"), 2, 3, 0, 2)
+        self.AlignBoneChain(modelName + rig_label("jRing1"), 2, 3, 0, 2)
+        self.AlignBoneChain(modelName + rig_label("jPink1"), 2, 3, 0, 2)
 
         self.fixRotations(jIndex2)
         self.fixRotations(jIndex3)

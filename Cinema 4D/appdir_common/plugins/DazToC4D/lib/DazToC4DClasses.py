@@ -6,6 +6,8 @@ from .CustomIterators import ObjectIterator
 from .Utilities import dazToC4Dutils
 from .IkMax import applyDazIK, ikmaxUtils
 from .AllSceneToZero import AllSceneToZero
+from .RigDictionary import is_g9, rig_label
+
 
 
 dazName = "Object_"
@@ -40,25 +42,26 @@ class DazToC4D:
                 c4d.EventAdd()
 
         if checkIfBrute():  # If BRUTE8! Change Null Sizes!
-            nullSize("Pelvis_ctrl", 40, 0.8)
-            nullSize("Spine_ctrl", 30, 0.8)
-            nullSize("Chest_ctrl", 30, 0.8)
-            nullSize("Foot_PlatformBase", 9.3, 1.52)
-            nullSize("Foot_PlatformBase___R", 9.3, 1.52)
-            nullSize("Collar_ctrl", 20, 0.3)
-            nullSize("Collar_ctrl___R", 20, 0.3)
+            print("BRUTE DETECTED")
+            nullSize(rig_label("Pelvis_ctrl"), 40, 0.8)
+            nullSize(rig_label("Spine_ctrl"), 30, 0.8)
+            nullSize(rig_label("Chest_ctrl"), 30, 0.8)
+            nullSize(rig_label("Foot_PlatformBase"), 9.3, 1.52)
+            nullSize(rig_label("Foot_PlatformBase___R"), 9.3, 1.52)
+            nullSize(rig_label("Collar_ctrl"), 20, 0.3)
+            nullSize(rig_label("Collar_ctrl___R"), 20, 0.3)
 
-            nullSize("ForearmTwist_ctrl", 11, 1.0)
-            nullSize("ForearmTwist_ctrl___R", 11, 1.0)
+            nullSize(rig_label("ForearmTwist_ctrl"), 11, 1.0)
+            nullSize(rig_label("ForearmTwist_ctrl___R"), 11, 1.0)
 
-            nullSize("IK_Hand", 7, 1.4)
-            nullSize("IK_Hand___R", 7, 1.4)
+            nullSize(rig_label("IK_Hand"), 7, 1.4)
+            nullSize(rig_label("IK_Hand___R"), 7, 1.4)
 
     def freezeTwistBones(self):
         doc = c4d.documents.GetActiveDocument()
 
-        nullForeArm = doc.SearchObject(dazName + "ForearmTwist_ctrl")
-        nullForeArmR = doc.SearchObject(dazName + "ForearmTwist_ctrl___R")
+        nullForeArm = doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl"))
+        nullForeArmR = doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl___R"))
         if nullForeArm:
             nullForeArm.SetFrozenPos(nullForeArm.GetAbsPos())
             nullForeArm.SetFrozenRot(nullForeArm.GetAbsRot())
@@ -98,7 +101,7 @@ class DazToC4D:
         obj = doc.GetFirstObject()
         scene = ObjectIterator(obj)
         for obj in scene:
-            if "Foot_PlatformBase" in obj.GetName():
+            if rig_label("Foot_PlatformBase") in obj.GetName():
                 addProtTag(obj)
 
         c4d.EventAdd()
@@ -119,8 +122,8 @@ class DazToC4D:
             obj.InsertTag(xtag)
             c4d.EventAdd()
 
-        nullForeArm = doc.SearchObject(dazName + "ForearmTwist_ctrl")
-        nullForeArmR = doc.SearchObject(dazName + "ForearmTwist_ctrl___R")
+        nullForeArm = doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl"))
+        nullForeArmR = doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl___R"))
         addProtTag(nullForeArm)
         addProtTag(nullForeArmR)
 
@@ -211,6 +214,8 @@ class DazToC4D:
         c4d.EventAdd()
 
     def autoIK(self, var):
+        if is_g9():
+            print("detected g9 model")
         doc = c4d.documents.GetActiveDocument()
         obj = doc.SearchObject("hip")
         if obj:

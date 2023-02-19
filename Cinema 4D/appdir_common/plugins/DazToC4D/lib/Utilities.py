@@ -7,9 +7,9 @@ from xml.etree import ElementTree
 from .Definitions import ROOT_DIR
 from .CustomIterators import TagIterator, ObjectIterator
 from .CustomCmd import Cinema4DCommands as dzc4d
-from . import Database
 from .DtuLoader import DtuLoader
 from .TextureLib import texture_library
+from .RigDictionary import is_g9, rig_label, database
 
 
 class Variables:
@@ -158,7 +158,6 @@ class Variables:
         self.find_body(self.import_name)
         self.find_body_name()
         self.find_children(self.skeleton)
-
 
 def get_daz_mesh():
     doc = documents.GetActiveDocument()
@@ -397,8 +396,8 @@ class dazToC4Dutils:
 
         nullObj = c4d.BaseObject(c4d.Onull)  # Create new cube
         doc.InsertObject(nullObj)
-        armJoint = doc.SearchObject("lShldrBend")
-        handJoint = doc.SearchObject("lForearmBend")
+        armJoint = doc.SearchObject(rig_label("lShldrBend"))
+        handJoint = doc.SearchObject(rig_label("lForearmBend"))
 
         mg = jointToFix.GetMg()
         nullObj.SetMg(mg)
@@ -489,11 +488,11 @@ class dazToC4Dutils:
     def dazFootRotfix(self):
         doc = documents.GetActiveDocument()
 
-        mainJoint = doc.SearchObject("lFoot")
-        goalJoint = doc.SearchObject("lToe")
+        mainJoint = doc.SearchObject(rig_label("lFoot"))
+        goalJoint = doc.SearchObject(rig_label("lToe"))
         self.fixDazFootRot(goalJoint, "AIM", mainJoint)
 
-        jointOposite = doc.SearchObject("rFoot")
+        jointOposite = doc.SearchObject(rig_label("rFoot"))
         rx = mainJoint[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_X]
         ry = mainJoint[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_Y]
         rz = mainJoint[c4d.ID_BASEOBJECT_REL_ROTATION, c4d.VECTOR_Z]
@@ -545,15 +544,15 @@ class dazToC4Dutils:
 
         doc = documents.GetActiveDocument()
         dazName = get_daz_name() + "_"
-        jointObj = doc.SearchObject(dazName + "jHand")
+        jointObj = doc.SearchObject(dazName + rig_label("jHand"))
         ikZeroRot(jointObj)
 
-        jointObj = doc.SearchObject(dazName + "jHand___R")
+        jointObj = doc.SearchObject(dazName + rig_label("jHand___R"))
         ikZeroRot(jointObj)
 
-        jointObj = doc.SearchObject(dazName + "jUpLeg.Pole___R")
+        jointObj = doc.SearchObject(dazName + rig_label("jUpLeg.Pole___R"))
         jointObj[c4d.ID_BASEOBJECT_FROZEN_ROTATION, c4d.VECTOR_X] = 0
-        jointObj = doc.SearchObject(dazName + "jArm.Pole___R")
+        jointObj = doc.SearchObject(dazName + rig_label("jArm.Pole___R"))
         jointObj[c4d.ID_BASEOBJECT_FROZEN_ROTATION, c4d.VECTOR_X] = 0
         c4d.EventAdd()
 
@@ -585,14 +584,14 @@ class dazToC4Dutils:
                     for obj in listObjs:
                         hideJoint(obj, value)
 
-            objPelvis = doc.SearchObject(dazName + "jPelvis")
+            objPelvis = doc.SearchObject(dazName + rig_label("jPelvis"))
             hideJoint(objPelvis, 0)
-            hideJoints("jSpine", 0)
-            hideJoints("jUpLeg", 0)
-            hideJoints("jUpLeg___R", 0)
+            hideJoints(rig_label("jSpine"), 0)
+            hideJoints(rig_label("jUpLeg"), 0)
+            hideJoints(rig_label("jUpLeg___R"), 0)
 
-            hideJoints("jHand", 2)  # Show
-            hideJoints("jHand___R", 2)  # Show
+            hideJoints(rig_label("jHand"), 2)  # Show
+            hideJoints(rig_label("jHand___R"), 2)  # Show
 
             c4d.EventAdd()
 
@@ -665,11 +664,11 @@ class dazToC4Dutils:
             )
             constraintTAG.Remove()
 
-        twistJoint = doc.SearchObject(dazName + "ForearmTwist_ctrl")
-        handJoint = doc.SearchObject("lHand")
+        twistJoint = doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl"))
+        handJoint = doc.SearchObject(rig_label("lHand"))
         aimObj(twistJoint, handJoint, "AIM", 0)
-        twistJoint = doc.SearchObject(dazName + "ForearmTwist_ctrl___R")
-        handJoint = doc.SearchObject("rHand")
+        twistJoint = doc.SearchObject(dazName + rig_label("ForearmTwist_ctrl___R"))
+        handJoint = doc.SearchObject(rig_label("rHand"))
         aimObj(twistJoint, handJoint, "AIM", 0)
 
     def fixConstraints(self):
@@ -681,12 +680,12 @@ class dazToC4Dutils:
                 tag[c4d.ID_CA_CONSTRAINT_TAG_PSR_MAINTAIN] = True
                 c4d.EventAdd()
 
-        fixConstraint("lForearmTwist")
-        fixConstraint("rForearmTwist")
+        fixConstraint(rig_label("lForearmTwist"))
+        fixConstraint(rig_label("rForearmTwist"))
 
     def hideRig(self):
         doc = documents.GetActiveDocument()
-        obj = doc.SearchObject("hip")
+        obj = doc.SearchObject(rig_label("hip"))
         dazRig = obj.GetUp()
         guideNulls = self.iterateObjChilds(dazRig)
         for obj in guideNulls:
@@ -716,20 +715,20 @@ class dazToC4Dutils:
             c4d.EventAdd()
 
         dazName = get_daz_name() + "_"
-        protectObj(dazName + "Toe_Rot")
-        protectObj(dazName + "Toe_Rot___R")
-        protectObj(dazName + "Foot_Roll")
-        protectObj(dazName + "Foot_Roll___R")
+        protectObj(dazName + rig_label("Toe_Rot"))
+        protectObj(dazName + rig_label("Toe_Rot___R"))
+        protectObj(dazName + rig_label("Foot_Roll"))
+        protectObj(dazName + rig_label("Foot_Roll___R"))
 
     def addHeadEndBone(self):
         doc = documents.GetActiveDocument()
-        jointHeadEnd = doc.SearchObject("head_end")
+        jointHeadEnd = doc.SearchObject(rig_label("head_end"))
         if jointHeadEnd == None:
-            jointCollar = doc.SearchObject("lCollar")
+            jointCollar = doc.SearchObject(rig_label("lCollar"))
 
-            jointHead = doc.SearchObject("head")
+            jointHead = doc.SearchObject(rig_label("head"))
             newJoint = c4d.BaseObject(c4d.Ojoint)
-            newJoint.SetName("head_end")
+            newJoint.SetName(rig_label("head_end"))
             doc.InsertObject(newJoint)
             newJoint.InsertUnder(jointHead)
             newJoint.SetMg(jointHead.GetMg())
@@ -878,7 +877,7 @@ class dazToC4Dutils:
         doc = documents.GetActiveDocument()
         meshName = dazName + "_"
         self.addHeadEndBone()
-        guides = Database.guides_for_rig
+        guides = database().guides_for_rig
         for objs in guides:
             guide_suffix = objs[0]
             joint = objs[1]
@@ -889,34 +888,34 @@ class dazToC4Dutils:
 
     def cleanJointsDaz(self, side="Left"):
         doc = documents.GetActiveDocument()
-        prefix = "l"
+        prefix = "l_" if is_g9() else "l"
         suffix = ""
         if side == "Right":
-            prefix = "r"
+            prefix = "r_" if is_g9() else "r"
             suffix = "___R"
-        if doc.SearchObject(prefix + "SmallToe4"):
-            self.parentTo(prefix + "SmallToe4", prefix + "Toe")
-        if doc.SearchObject(prefix + "SmallToe3"):
-            self.parentTo(prefix + "SmallToe3", prefix + "Toe")
-        if doc.SearchObject(prefix + "SmallToe2"):
-            self.parentTo(prefix + "SmallToe2", prefix + "Toe")
-        if doc.SearchObject(prefix + "SmallToe1"):
-            self.parentTo(prefix + "SmallToe1", prefix + "Toe")
-        if doc.SearchObject(prefix + "BigToe"):
-            self.parentTo(prefix + "BigToe", prefix + "Toe")
+        if doc.SearchObject(prefix + rig_label("SmallToe4")):
+            self.parentTo(prefix + rig_label("SmallToe4"), prefix + rig_label("Toe"))
+        if doc.SearchObject(prefix + rig_label("SmallToe3")):
+            self.parentTo(prefix + rig_label("SmallToe3"), prefix + rig_label("Toe"))
+        if doc.SearchObject(prefix + rig_label("SmallToe2")):
+            self.parentTo(prefix + rig_label("SmallToe2"), prefix + rig_label("Toe"))
+        if doc.SearchObject(prefix + rig_label("SmallToe1")):
+            self.parentTo(prefix + rig_label("SmallToe1"), prefix + rig_label("Toe"))
+        if doc.SearchObject(prefix + rig_label("BigToe")):
+            self.parentTo(prefix + rig_label("BigToe"), prefix + rig_label("Toe"))
         c4d.EventAdd()
 
     def constraintJointsToDaz(self, side="Left"):
         doc = documents.GetActiveDocument()
         dazName = get_daz_name()
         meshName = dazName + "_"
-        prefix = "l"
+        prefix = "l_" if is_g9() else "l"
         suffix = ""
         if side == "Right":
-            prefix = "r"
+            prefix = "r_" if is_g9() else "r"
             suffix = "___R"
 
-        joints = Database.constraint_joints
+        joints = database().constraint_joints
         for joint in joints:
             dz_joint = joint[0]
             ctrl_joint = joint[1]
